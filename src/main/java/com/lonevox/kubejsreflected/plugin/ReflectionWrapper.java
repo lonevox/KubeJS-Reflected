@@ -1,5 +1,7 @@
 package com.lonevox.kubejsreflected.plugin;
 
+import dev.latvian.mods.rhino.util.HideFromJS;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,6 +21,7 @@ public interface ReflectionWrapper {
 		return Class.forName(className);
 	}
 
+	@HideFromJS
 	static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
 		for (Field field : clazz.getDeclaredFields()) {
 			if (field.getName().equals(fieldName)) {
@@ -34,15 +37,25 @@ public interface ReflectionWrapper {
 	}
 
 	static Field getField(Object object, String fieldName) throws ClassNotFoundException, NoSuchFieldException {
+		if (object instanceof Class<?> clazz) {
+			return ReflectionWrapper.getField(clazz, fieldName);
+		}
 		return ReflectionWrapper.getField(ReflectionWrapper.getClass(object), fieldName);
-	}
-
-	static Object getFieldValue(Class<?> clazz, Object object, String fieldName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-		return ReflectionWrapper.getField(clazz, fieldName).get(object);
 	}
 
 	static Object getFieldValue(Object object, String fieldName) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
 		return ReflectionWrapper.getField(object, fieldName).get(object);
+	}
+
+	static Object getFieldValue(Object object, Field field) throws IllegalAccessException {
+		return field.get(object);
+	}
+
+	static Object getFieldValue(Field field) throws IllegalAccessException {
+		if (!Modifier.isStatic(field.getModifiers())) {
+			throw new IllegalArgumentException("Field must be static to use this getFieldValue function shape. You probably want to instead use getFieldValue(Object object, Field field).");
+		}
+		return field.get(null);
 	}
 
 	static void setFieldValue(Object object, Field field, Object value) throws IllegalAccessException {
@@ -65,10 +78,6 @@ public interface ReflectionWrapper {
 		}
 	}
 
-//	static void setFieldValue(Class<?> clazz, String fieldName, Object value) throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
-//		ReflectionWrapper.setFieldValue(object, ReflectionWrapper.getField(object, fieldName), value);
-//	}
-
 	static void setFieldValue(Object object, String fieldName, Object value) throws NoSuchFieldException, ClassNotFoundException, IllegalAccessException {
 		ReflectionWrapper.setFieldValue(object, ReflectionWrapper.getField(object, fieldName), value);
 	}
@@ -80,6 +89,7 @@ public interface ReflectionWrapper {
 		ReflectionWrapper.setFieldValue(null, field, value);
 	}
 
+	@HideFromJS
 	static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException {
 		var method = clazz.getDeclaredMethod(methodName, parameterTypes);
 		method.setAccessible(true);
@@ -87,6 +97,9 @@ public interface ReflectionWrapper {
 	}
 
 	static Method getMethod(Object object, String methodName, Class<?>... parameterTypes) throws NoSuchMethodException, ClassNotFoundException {
+		if (object instanceof Class<?> clazz) {
+			return ReflectionWrapper.getMethod(clazz, methodName, parameterTypes);
+		}
 		return ReflectionWrapper.getMethod(ReflectionWrapper.getClass(object), methodName, parameterTypes);
 	}
 
