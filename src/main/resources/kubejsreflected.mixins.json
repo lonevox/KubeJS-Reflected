@@ -5,7 +5,8 @@
   "mixins": [
     "CachedMethodInfoMixin",
     "KubeJSContextMixin",
-    "KubeJSPluginsMixin"
+    "KubeJSPluginsMixin",
+    "ContextMixin"
   ],
   "injectors": {
     "defaultRequire": 1
