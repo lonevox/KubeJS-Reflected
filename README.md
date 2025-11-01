@@ -7,11 +7,14 @@ Returns the ability to use reflection in [KubeJS](https://kubejs.com/) scripts, 
 ## Usage
 > [!IMPORTANT]
 > Calling Java Class object methods is unsupported, because Class objects in JS (such as `$ListTag.__javaObject__`) is seen by Rhino as a ListTag when finding its methods, not the ListTag Class object, so Rhino can't find any Class methods like `getDeclaredField`.
+
+The following code throws an `EvaulatorException` when trying to call `getDeclaredField`.
+
 ```js
 let $ListTag = Java.loadClass("net.minecraft.nbt.ListTag")
 
 // NOTE: __javaObject__ only exists on objects loaded with Java.loadClass
-const field_SELF_SIZE_IN_BYTES = $ListTag.__javaObject__.getDeclaredField("SELF_SIZE_IN_BYTES"); // Throws EvaulatorException
+const field_SELF_SIZE_IN_BYTES = $ListTag.__javaObject__.getDeclaredField("SELF_SIZE_IN_BYTES");
 ```
 
 Instead, use the `Reflection` object. The following script works in `startup_scripts`, `server_scripts`, or `client_scripts`.
