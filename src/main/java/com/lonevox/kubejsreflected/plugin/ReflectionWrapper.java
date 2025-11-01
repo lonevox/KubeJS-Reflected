@@ -14,6 +14,9 @@ public interface ReflectionWrapper {
 		if (object instanceof String stringObject) {
 			return ReflectionWrapper.getClass(stringObject);
 		}
+		if (object instanceof Class<?> classObject) {
+			return classObject;
+		}
 		return object.getClass();
 	}
 
