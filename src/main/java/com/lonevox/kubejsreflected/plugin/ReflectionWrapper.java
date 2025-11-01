@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 public interface ReflectionWrapper {
 	static Class<?> getClass(Object object) throws ClassNotFoundException {
@@ -106,10 +105,14 @@ public interface ReflectionWrapper {
 		return ReflectionWrapper.getMethod(ReflectionWrapper.getClass(object), methodName, parameterTypes);
 	}
 
-	static Object invokeMethod(Object object, String methodName, Object... args) throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
-		Class<?>[] argumentClasses = Arrays.stream(args)
+	static Class<?>[] objectsToClasses(Object... args) {
+		return Arrays.stream(args)
 				.map(Object::getClass)
 				.toArray(Class<?>[]::new);
+	}
+
+	static Object invokeMethod(Object object, String methodName, Object... args) throws NoSuchMethodException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
+		var argumentClasses = ReflectionWrapper.objectsToClasses(args);
 		var method = ReflectionWrapper.getMethod(object, methodName, argumentClasses);
 		return method.invoke(object, args);
 	}
